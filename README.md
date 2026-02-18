@@ -8,7 +8,7 @@
 
 **This project was fully AI-coded. None of it was written by me.**
 
-For refunds or support, contact **@noircodes** on Telegram.
+For refuds or support, contact **@noircodes** on Telegram.
 
 ---
 
