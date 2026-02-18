@@ -1,0 +1,23 @@
+# Build outputs
+bin/
+obj/
+output/
+*_obf/
+*.user
+*.suo
+.vs/
+
+# Telegram bot (excluded from repo)
+TelegramBot/
+
+# IDE / OS
+.DS_Store
+Thumbs.db
+*.log
+
+# NuGet
+packages/
+*.nupkg
+
+# Costura/Fody
+FodyWeavers.xsd
