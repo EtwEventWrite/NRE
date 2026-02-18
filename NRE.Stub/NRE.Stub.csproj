@@ -9,6 +9,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Embedded\EmbeddedData.g.cs" />
+    <Compile Include="Embedded\EmbeddedData.g.cs" Condition="Exists('Embedded\EmbeddedData.g.cs')" />
+    <Compile Remove="Embedded\EmbeddedData.Default.cs" />
+    <Compile Include="Embedded\EmbeddedData.Default.cs" Condition="!Exists('Embedded\EmbeddedData.g.cs')" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\NRE.Core\NRE.Core.csproj" />
     <PackageReference Include="System.Management" Version="8.0.0" />
     <PackageReference Include="Costura.Fody" Version="5.7.0">

