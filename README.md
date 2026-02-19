@@ -1,68 +1,90 @@
 # NRE
 
-.NET crypter: builder (encrypts/obfuscates payloads, produces a single stub exe) and stub (loads and runs the payload with optional evasion).
+**N**et **R**untime **E**ncryptor — a .NET crypter that packs your payload into a single executable. The **builder** encrypts and embeds a payload; the **stub** loads and runs it at runtime with optional evasion.
 
 ---
 
 ## Disclaimer
 
-**This project was fully AI-coded. None of it was written by me.**
+This project was **fully AI-generated**. None of the code was written by the repo owner.
 
-For refuds or support, contact **@noircodes** on Telegram.
+**Refunds or support:** contact **@noircodes** on Telegram.
 
 ---
 
-## Repo layout
+## Overview
 
-- **NRE.Builder** — CLI that encrypts a .NET or native payload, optionally obfuscates the stub, outputs one exe
-- **NRE.BuilderGui** — ImGui-based GUI for the builder (optional)
-- **NRE.Stub** — Loader stub (Costura single-file); runs the decrypted payload
-- **NRE.Core** — Shared code (logging, evasion helpers, etc.)
-- **NRE.TestPayload** / **NRE.NativeTestPayload** — Example payloads for testing
-- **NRE.Tests** — Unit tests
-- **Tools** — Helper scripts (e.g. payload prep)
+| Project | Description |
+|--------|-------------|
+| **NRE.Builder** | CLI: encrypts a payload, optionally obfuscates the stub, outputs one exe |
+| **NRE.BuilderGui** | ImGui GUI for the builder (optional) |
+| **NRE.Stub** | Single-file loader (Costura); decrypts and runs the payload |
+| **NRE.Core** | Shared code (logging, evasion helpers) |
+| **NRE.TestPayload** | Example .NET payload for testing |
+| **NRE.Tests** | Unit tests |
+
+---
 
 ## Requirements
 
-- .NET Framework 4.8
-- Windows (stub uses Win32 APIs and optional evasion)
-- Visual Studio 2022 or `dotnet` CLI
+- **.NET Framework 4.8**
+- **Windows** (stub uses Win32 and optional evasion)
+- **Visual Studio 2022** or **dotnet** CLI
+
+---
 
 ## Build
 
-- Open the solution in Visual Studio or build from CLI: `dotnet build -c Release`
-- **Stub:** `NRE.Stub` builds as a single exe (Costura). If `Embedded\EmbeddedData.g.cs` is missing (e.g. fresh clone), the stub still compiles using `EmbeddedData.Default.cs` (empty payload). Run the builder with `-c` to embed a real payload and overwrite `EmbeddedData.g.cs`.
-- **Builder:** `NRE.Builder` — use this to crypt a payload into the stub and write the output exe.
-
-## Usage (builder)
-
-```text
-NRE.Builder.exe -i <input.exe> -o <output.exe> [-c] [--specific] [--wldp] [--scriptblock-log] ...
+```bash
+dotnet build NRE.sln -c Release
 ```
 
-- `-i` / `-o`: input payload and output stub exe  
-- `-c`: crypt (encrypt payload into stub)  
-- `--specific`: AV-specific bypass options  
-- `--wldp`: WLDP policy  
-- `--scriptblock-log`: scriptblock logging bypass  
-- `--earlybird`: shellcode via Early Bird APC injection  
-- `--module-stomping`: shellcode via module stomping (amsi.dll)  
-- `--delay <sec>`: sleep N seconds before execution (evades sandbox timeouts)  
-- `--mutex <name>`: single-instance mutex (exit if already running)  
-- `--compress-format lznt1|xpress|aplib`: compression format (with `-c`)  
+- **Stub:** Builds as a single exe. If `NRE.Stub/Embedded/EmbeddedData.g.cs` is missing (e.g. fresh clone), the project uses `EmbeddedData.Default.cs` (empty payload). Run the builder with `-c` to embed a real payload and regenerate that file.
+- **Builder:** Use `NRE.Builder` to crypt a payload into the stub and produce the output exe.
+- **GUI:** Run `NRE.BuilderGui\bin\Release\net48\NRE.BuilderGui.exe` (64-bit; run from repo root so the stub path resolves when you click Build).
 
-See builder help for full options.
+---
 
-## Payload types
+## Usage
 
-- **.NET assembly** — in-memory load and entry-point invoke
-- **Native EXE/DLL** — manual map and run
-- **Raw shellcode** — VirtualAlloc + execute (or thread-pool option)
+### CLI (NRE.Builder)
+
+```text
+NRE.Builder.exe -i <input.exe> -o <output.exe> [-c] [options...]
+```
+
+| Option | Description |
+|--------|-------------|
+| `-i`, `-o` | Input payload and output exe path |
+| `-c` | Crypt: encrypt payload and embed into stub |
+| `--compress-format lznt1\|xpress\|aplib` | Compression (when using `-c`) |
+| `--delay <sec>` | Sleep N seconds before execution |
+| `--mutex <name>` | Single-instance mutex; exit if already running |
+| `--earlybird` | Shellcode via Early Bird APC injection |
+| `--module-stomping` | Shellcode via module stomping |
+| `--specific` | AV-specific bypass options |
+| `--wldp` | WLDP policy |
+| `--scriptblock-log` | Scriptblock logging bypass |
+
+Run with `--help` for the full list.
+
+### Payload types
+
+- **.NET assembly** — in-memory load and entry-point invoke  
+- **Native EXE/DLL** — manual map and run  
+- **Raw shellcode** — VirtualAlloc + execute (or thread-pool)
+
+---
 
 ## Troubleshooting
 
-- **Stub build fails:** Ensure `NRE.Core` is built first. If `EmbeddedData.g.cs` is missing, the project uses the fallback (empty payload) so the stub still builds.
-- **Decrypt/load errors at runtime:** Stub shows a MessageBox with the error; check key/IV and payload type match what the builder embedded.
+| Issue | Fix |
+|-------|-----|
+| Stub build fails | Build `NRE.Core` first. If `EmbeddedData.g.cs` is missing, the stub still builds with the empty fallback. |
+| Decrypt/load errors at runtime | Stub shows a MessageBox; verify key/IV and payload type match what the builder embedded. |
+| GUI won’t start | Ensure 64-bit build and run from the repo root. |
+
+---
 
 ## License
 
