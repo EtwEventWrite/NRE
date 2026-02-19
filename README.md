@@ -15,6 +15,7 @@ For refuds or support, contact **@noircodes** on Telegram.
 ## Repo layout
 
 - **NRE.Builder** — CLI that encrypts a .NET or native payload, optionally obfuscates the stub, outputs one exe
+- **NRE.BuilderGui** — ImGui-based GUI for the builder (optional)
 - **NRE.Stub** — Loader stub (Costura single-file); runs the decrypted payload
 - **NRE.Core** — Shared code (logging, evasion helpers, etc.)
 - **NRE.TestPayload** / **NRE.NativeTestPayload** — Example payloads for testing
