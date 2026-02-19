@@ -44,6 +44,11 @@ NRE.Builder.exe -i <input.exe> -o <output.exe> [-c] [--specific] [--wldp] [--scr
 - `--specific`: AV-specific bypass options  
 - `--wldp`: WLDP policy  
 - `--scriptblock-log`: scriptblock logging bypass  
+- `--earlybird`: shellcode via Early Bird APC injection  
+- `--module-stomping`: shellcode via module stomping (amsi.dll)  
+- `--delay <sec>`: sleep N seconds before execution (evades sandbox timeouts)  
+- `--mutex <name>`: single-instance mutex (exit if already running)  
+- `--compress-format lznt1|xpress|aplib`: compression format (with `-c`)  
 
 See builder help for full options.
 

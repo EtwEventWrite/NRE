@@ -17,5 +17,7 @@ namespace NRE.Stub.Embedded
         public static PayloadType PayloadType => PayloadType.DotNetAssembly;
         public static CompressionFormat CompressionFormat => CompressionFormat.None;
         public static EvasionOptions Evasion => EvasionOptions.None;
+        public static int DelaySeconds => 0;
+        public static string MutexName => "";
     }
 }

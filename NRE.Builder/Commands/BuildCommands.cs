@@ -94,7 +94,8 @@ namespace NRE.Builder.Commands
         var generatedPath = Path.Combine(embeddedDir, "EmbeddedData.g.cs");
         var embedSw = Stopwatch.StartNew();
         var embeddedSource = ResourceEmbedder.GenerateEmbeddedDataClass(
-            encrypted, key, iv, payloadType, config.CompressionFormat, config.Evasion);
+            encrypted, key, iv, payloadType, config.CompressionFormat, config.Evasion,
+            config.DelaySeconds, config.MutexName);
         File.WriteAllText(generatedPath, embeddedSource);
         embedSw.Stop();
         Logger.Info("Generated: " + generatedPath + " (" + new FileInfo(generatedPath).Length + " bytes, " + embedSw.ElapsedMilliseconds + " ms)");

